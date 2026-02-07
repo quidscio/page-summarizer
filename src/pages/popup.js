@@ -2,7 +2,7 @@ import { isReasoningModel } from '../gpt.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
   const defaultModel = 'gpt-4o-mini';
-  const defaultReasoning = 'medium';
+  const defaultReasoning = 'high';
 
   const query = new URLSearchParams(window.location.search);
   const shouldAutoSummarize = query.get('autoSummarize') === '1';
@@ -25,12 +25,16 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Tab ID
   //----------------------------------------------------------------------------
   let tabId;
+  let canSummarize = true;
 
   if (query.has('tabId')) {
     tabId = parseInt(query.get('tabId'), 10);
   } else {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     tabId = tabs[0].id;
+  }
+  if (Number.isNaN(tabId)) {
+    canSummarize = false;
   }
 
   // Assigns the tabId to the new window link, so that when you open the popup
@@ -45,8 +49,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Returns the URL of the original tab, identified by the global tabId.
   async function getOriginalTabUrl() {
-    const tab = await chrome.tabs.get(tabId);
-    return tab.url;
+    try {
+      const tab = await chrome.tabs.get(tabId);
+      return tab.url;
+    } catch (error) {
+      canSummarize = false;
+      throw new Error('Original tab is no longer available. Please reopen the popup from the page you want to summarize.');
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -96,8 +105,16 @@ document.addEventListener('DOMContentLoaded', async function () {
   // extension popups as full screen tabs).
   //----------------------------------------------------------------------------
   async function displayHeader() {
+    const sourceUrl = document.getElementById('sourceUrl');
     document.getElementById('header').classList.remove('visually-hidden');
-    document.getElementById('sourceUrl').href = (await chrome.tabs.get(tabId)).url;
+
+    try {
+      sourceUrl.href = (await chrome.tabs.get(tabId)).url;
+      sourceUrl.textContent = '[source]';
+    } catch (error) {
+      sourceUrl.removeAttribute('href');
+      sourceUrl.textContent = '[source unavailable]';
+    }
   }
 
   if (query.has('tabId') || isMobile) {
@@ -233,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Extracting text from anything supported
   //----------------------------------------------------------------------------
   async function getReferenceText() {
-    const url = (await chrome.tabs.get(tabId)).url;
+    const url = await getOriginalTabUrl();
 
     if (isPDF(url)) {
       return extractTextFromPDF(url);
@@ -485,7 +502,15 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   async function restoreSummary() {
-    const url = await getOriginalTabUrl();
+    let url;
+
+    try {
+      url = await getOriginalTabUrl();
+    } catch (error) {
+      reportError(error.message || error);
+      return null;
+    }
+
     const config = await chrome.storage.local.get('results');
 
     if (config.results && config.results[url] && config.results[url].summary) {
@@ -504,7 +529,14 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   async function setSummary(summary, model) {
-    const url = await getOriginalTabUrl();
+    let url;
+
+    try {
+      url = await getOriginalTabUrl();
+    } catch (error) {
+      return;
+    }
+
     const config = await chrome.storage.local.get('results');
 
     let results = config.results || {};
@@ -555,6 +587,11 @@ document.addEventListener('DOMContentLoaded', async function () {
   let working = false;
 
   function startSummary() {
+    if (!canSummarize) {
+      reportError('Original tab is no longer available. Please reopen the popup from the page you want to summarize.');
+      return;
+    }
+
     if (working) {
       return;
     }
@@ -577,7 +614,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       requestAnimationFrame(() => {
         window.scrollTo(0, 0);
       });
-    } else if (shouldAutoSummarize) {
+    } else if (shouldAutoSummarize && canSummarize) {
       startSummary();
     }
   });
