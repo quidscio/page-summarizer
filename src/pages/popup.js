@@ -40,11 +40,23 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Assigns the tabId to the new window link, so that when you open the popup
   // in a new window, the new window will have the same tabId.
   document.getElementById('newWindow').addEventListener('click', async () => {
-    chrome.tabs.create({ url: 'src/pages/popup.html?tabId=' + tabId });
+    const url = 'src/pages/popup.html?tabId=' + tabId;
+    try {
+      const baseTab = await chrome.tabs.get(tabId);
+      chrome.tabs.create({ url, index: baseTab.index + 1 });
+    } catch (error) {
+      chrome.tabs.create({ url });
+    }
   });
 
   document.getElementById('newWindowSummarize').addEventListener('click', async () => {
-    chrome.tabs.create({ url: 'src/pages/popup.html?tabId=' + tabId + '&autoSummarize=1' });
+    const url = 'src/pages/popup.html?tabId=' + tabId + '&autoSummarize=1';
+    try {
+      const baseTab = await chrome.tabs.get(tabId);
+      chrome.tabs.create({ url, index: baseTab.index + 1 });
+    } catch (error) {
+      chrome.tabs.create({ url });
+    }
   });
 
   // Returns the URL of the original tab, identified by the global tabId.
