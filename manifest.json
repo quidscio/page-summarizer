@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Page Summarizer",
+  "name": "Page Summarizer Plus",
   "version": "2.0.8",
   "description": "Summarize web pages using OpenAI API",
   "permissions": [

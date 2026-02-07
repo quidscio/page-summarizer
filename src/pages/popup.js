@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   const defaultReasoning = 'medium';
 
   const query = new URLSearchParams(window.location.search);
+  const shouldAutoSummarize = query.get('autoSummarize') === '1';
 
   const target = document.getElementById('summary');
   const modelDropdown = document.getElementById('model');
@@ -36,6 +37,10 @@ document.addEventListener('DOMContentLoaded', async function () {
   // in a new window, the new window will have the same tabId.
   document.getElementById('newWindow').addEventListener('click', async () => {
     chrome.tabs.create({ url: 'src/pages/popup.html?tabId=' + tabId });
+  });
+
+  document.getElementById('newWindowSummarize').addEventListener('click', async () => {
+    chrome.tabs.create({ url: 'src/pages/popup.html?tabId=' + tabId + '&autoSummarize=1' });
   });
 
   // Returns the URL of the original tab, identified by the global tabId.
@@ -546,6 +551,19 @@ document.addEventListener('DOMContentLoaded', async function () {
       });
   }
 
+  // Flag to prevent multiple clicks
+  let working = false;
+
+  function startSummary() {
+    if (working) {
+      return;
+    }
+
+    working = true;
+    updateSummary('Fetching summary...');
+    requestNewSummary();
+  }
+
   // Restore the last page summary when the popup is opened
   restoreSummary().then((result) => {
     if (result != null) {
@@ -559,6 +577,8 @@ document.addEventListener('DOMContentLoaded', async function () {
       requestAnimationFrame(() => {
         window.scrollTo(0, 0);
       });
+    } else if (shouldAutoSummarize) {
+      startSummary();
     }
   });
 
@@ -567,17 +587,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     setReasoningEffort(model);
   });
 
-  // Flag to prevent multiple clicks
-  let working = false;
-
   // Handle the summarize button click
-  document.getElementById('summarize').addEventListener('click', function () {
-    if (working) {
-      return;
-    }
-
-    working = true;
-    updateSummary('Fetching summary...');
-    requestNewSummary();
-  });
+  document.getElementById('summarize').addEventListener('click', startSummary);
 });
