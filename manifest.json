@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Page Summarizer Plus",
-  "version": "2.0.8",
+  "name": "Page Summarizer Plus (Local)",
+  "version": "2.1.0",
+  "version_name": "Local custom 2.1.0",
   "description": "Summarize web pages using OpenAI API",
   "permissions": [
     "activeTab",
