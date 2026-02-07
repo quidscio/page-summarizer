@@ -221,7 +221,7 @@ export async function fetchAndStream(port, messages, options = {}) {
 // purposes.
 //------------------------------------------------------------------------------
 export function wantModel(model) {
-  return [/^o\d-mini$/, /^gpt-\d(\.\d)?o(-mini)?$/].some((re) => re.test(model));
+  return [/^o\d-mini$/, /^gpt-\d(\.\d)?o(-mini)?$/, /^gpt-5(\.\d+)?$/].some((re) => re.test(model));
 }
 
 //------------------------------------------------------------------------------

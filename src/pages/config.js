@@ -2,7 +2,7 @@ import { wantModel, isReasoningModel } from '../gpt.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const defaultModel = 'gpt-4o-mini';
-  const defaultReasoning = 'medium';
+  const defaultReasoning = 'high';
 
   const maxPromptBytes = 8192;
   const customPromptsCounter = document.getElementById('customPromptsCounter');
