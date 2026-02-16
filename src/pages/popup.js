@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   const reasoningDropdown = document.getElementById('reasoning');
   const instructions = document.getElementById('instructions');
   const profileContainer = document.getElementById('profileContainer');
+  const pinToTopToggle = document.getElementById('pinToTop');
 
   //----------------------------------------------------------------------------
   // Mobile device detection
@@ -499,8 +500,40 @@ document.addEventListener('DOMContentLoaded', async function () {
   // user scrolls up, disable autoscroll until they scroll back to the bottom.
   //----------------------------------------------------------------------------
   let autoScroll = true;
+  let pinToTop = true;
+
+  async function loadScrollPreference() {
+    const config = await chrome.storage.local.get('pinToTop');
+    pinToTop = config.pinToTop !== false;
+    pinToTopToggle.checked = pinToTop;
+
+    if (pinToTop) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
+    }
+  }
+
+  pinToTopToggle.addEventListener('change', () => {
+    pinToTop = pinToTopToggle.checked;
+    chrome.storage.local.set({ pinToTop: pinToTop });
+
+    if (pinToTop) {
+      autoScroll = false;
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
+    } else {
+      const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+      autoScroll = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+    }
+  });
 
   window.addEventListener('scroll', () => {
+    if (pinToTop) {
+      return;
+    }
+
     const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
     autoScroll = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
   });
@@ -562,6 +595,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       target.innerHTML = message;
 
+      if (pinToTop) {
+        return;
+      }
+
       // Autoscroll to the bottom of the page
       if (autoScroll) {
         window.scrollTo(0, document.body.scrollHeight);
@@ -609,6 +646,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     working = true;
+    if (pinToTop) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
+    }
     updateSummary('Fetching summary...');
     requestNewSummary();
   }
@@ -635,6 +677,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     const model = getModel();
     setReasoningEffort(model);
   });
+
+  await loadScrollPreference();
 
   // Handle the summarize button click
   document.getElementById('summarize').addEventListener('click', startSummary);

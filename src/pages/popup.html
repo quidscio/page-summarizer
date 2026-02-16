@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Page Summarizer</title>
+    <title>Page Summarizer Plus</title>
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,7 +17,7 @@
   <body class="p-2">
     <div id="header" class="mb-3 visually-hidden">
       <h2 class="position-relative">
-        Page Summarizer
+        Page Summarizer Plus
 
         <span class="fs-6 text-body-secondary position-absolute top-0 end-0">
           <a id="sourceUrl">[source]</a>
@@ -61,6 +61,11 @@
       <button id="summarize" class="btn btn-outline-primary btn-sm" title="Summarize page">Summarize page</button>
       <button id="copySummary" class="btn btn-outline-primary btn-sm" disabled title="Copy summary">&#x1F4CB;</button>
       <button id="options" class="btn btn-outline-primary btn-sm" title="Settings">&#x2699;</button>
+    </div>
+
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" id="pinToTop" checked />
+      <label class="form-check-label" for="pinToTop">Pin view to top while streaming</label>
     </div>
 
     <div id="errors"></div>
