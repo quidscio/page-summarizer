@@ -83,6 +83,12 @@ Go [here](https://chromewebstore.google.com/detail/page-summarizer/mcebcgkikhcji
 - Check the JavaScript console for any errors.
 - Find the bugs in my code and submit a PR
 
+## Development 
+* Windows is ok
+* Make changes locally
+* In chrome:extension, update extensions 
+* Reload and retry 
+
 ## Contributing
 
 Pull requests are welcome! For major changes, please open an issue first to
