@@ -15,6 +15,7 @@ export async function setDefaultConfig() {
   await updateConfig(null, async (config) => {
     config.profiles ||= [];
     config.debug ||= false;
+    config.skipPopupOnActionClick ||= false;
     config.apiKey ||= '';
 
     if (!config.defaultProfile) {

@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Global options
   const apiKey = document.getElementById('apiKey');
   const debug = document.getElementById('debug');
+  const skipPopupOnActionClick = document.getElementById('skipPopupOnActionClick');
 
   // Profile options
   const name = document.getElementById('name');
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return {
       apiKey: '',
       debug: false,
+      skipPopupOnActionClick: false,
       defaultProfile: 'default',
       profiles: ['default'],
       profile__default: buildDefaultProfile(),
@@ -102,6 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function saveConfig() {
     // Global options
     const debug = document.getElementById('debug').checked;
+    const skipPopupOnActionClick = document.getElementById('skipPopupOnActionClick').checked;
     const apiKey = document.getElementById('apiKey').value.trim();
 
     // Profile options
@@ -155,6 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     config.debug = debug;
+    config.skipPopupOnActionClick = skipPopupOnActionClick;
     config.apiKey = apiKey;
 
     if (isDefault) {
@@ -220,7 +224,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function reloadConfig() {
     const profileKeys = (await chrome.storage.sync.get('profiles')).profiles.map((name) => `profile__${name}`);
-    config = await chrome.storage.sync.get(['apiKey', 'defaultProfile', 'debug', 'models', 'profiles', ...profileKeys]);
+    config = await chrome.storage.sync.get([
+      'apiKey',
+      'defaultProfile',
+      'debug',
+      'models',
+      'profiles',
+      'skipPopupOnActionClick',
+      ...profileKeys,
+    ]);
     console.log('Config', config);
 
     if (config.profiles === undefined) {
@@ -234,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Then update the form with global configs
     debug.checked = !!(config.debug || false);
+    skipPopupOnActionClick.checked = !!(config.skipPopupOnActionClick || false);
     apiKey.value = config.apiKey;
 
     // Load profiles into the dropdown and select the current profile.
