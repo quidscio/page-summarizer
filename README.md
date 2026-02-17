@@ -1,8 +1,10 @@
-# Page Summarizer
+# Page Summarizer Plus (Local Fork)
 
-Page Summarizer is a Chrome extension that utilizes OpenAI's chat completions
+Page Summarizer Plus is a Chrome extension that utilizes OpenAI's chat completions
 API to summarize text from a web page. Just highlight the text you want to
 summarize, click the extension icon, and get a concise summary.
+
+This repository is a local fork of `sysread/page-summarizer` with custom behavior.
 
 ## Features
 
@@ -11,6 +13,13 @@ summarize, click the extension icon, and get a concise summary.
 - Fill in text with GPT
 - Customize instructions to get the information you want
 - Add persistent custom instructions for all summaries
+- Keep the popup pinned to the top while summary content streams
+- Action icon context menu batch actions:
+  - `Open+Summarize... > All tabs in this window`
+  - `Open+Summarize... > Selected tabs in this window`
+- Safety controls for batch open:
+  - Internal browser URLs are skipped (`chrome://`, `edge://`, etc.)
+  - Warning confirmation appears for more than 15 tabs
 - Uses the OpenAI conversations API
 
 ![Summarize a web page](./docs/summarize-page.gif)
@@ -62,6 +71,20 @@ Go [here](https://chromewebstore.google.com/detail/page-summarizer/mcebcgkikhcji
 
 - Click the Page Summarizer extension icon
 - Click "Summarize page"
+- Optional: toggle `Pin view to top while streaming` to prevent auto-scroll while content grows
+
+### Open+Summarize from action icon context menu
+
+- Right click the extension action icon
+- Choose `Open+Summarize...`
+- Pick one:
+  - `All tabs in this window`
+  - `Selected tabs in this window`
+
+Behavior:
+- New summary tabs are inserted immediately after each source tab
+- Unsupported browser-internal URLs are ignored
+- If more than 15 valid tabs are included, a confirmation popup is shown before opening tabs
 
 ### Summarize selected text
 
@@ -81,7 +104,25 @@ Go [here](https://chromewebstore.google.com/detail/page-summarizer/mcebcgkikhcji
 - Make sure you've entered the correct OpenAI API key.
 - Make sure your OpenAI account has sufficient API quota.
 - Check the JavaScript console for any errors.
+- If `manifest.json` permissions changed, reload the extension in `chrome://extensions`.
 - Find the bugs in my code and submit a PR
+
+## Fork Changes
+
+This fork includes the following customizations relative to upstream:
+
+- Branding/UI title updated to `Page Summarizer Plus`
+- Default prompt template replaced with a structured summary format including:
+  - Executive summary
+  - Section key points
+  - References/tools/people
+  - Immediate/future actions
+  - Source link
+  - Windows-safe `title_source` string output
+- Popup scroll control: `Pin view to top while streaming`
+- New action context submenu for batch `Open+Summarize`
+- Batch safety guardrails (URL filtering + warning threshold at 15 tabs)
+- Added permissions: `tabs` and host permissions `<all_urls>` for reliable multi-tab summarization
 
 ## Development 
 * Windows is ok
