@@ -6,9 +6,13 @@
   "description": "Summarize web pages using OpenAI API",
   "permissions": [
     "activeTab",
+    "tabs",
     "storage",
     "scripting",
     "contextMenus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "icons": {
     "16": "assets/icon_16.png",

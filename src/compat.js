@@ -8,7 +8,15 @@ const defaultModel = 'gpt-4o-mini';
 
 const defaultProfile = {
   model: defaultModel,
-  customPrompts: ['Please summarize the contents of this web page for brevity.'],
+  customPrompts: [
+    `Summarize this input text giving in this order:
+* Executive Summary paragraph stating title of content and primary tenants of content
+* Bullet list of key points for each major section in the content
+* References, tools, or people mentioned
+* Actions I might take immediately or in the future
+* Provide a link to the content.
+* Provide a "title string" in the form, title_source, composed of the article title and source using "-" characters instead of spaces and disallowed Windows filename characters. As one example, "Article-title-string_Source-of-article".`,
+  ],
 };
 
 export async function setDefaultConfig() {

@@ -268,25 +268,26 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (isPDF(url)) {
       return extractTextFromPDF(url);
     } else {
-      return new Promise((resolve, reject) => {
-        chrome.scripting.executeScript(
-          {
-            target: { tabId },
-            func: () => document.body.innerText,
-          },
-          (results) => {
-            if (results === undefined || results.length == 0) {
-              reject('Unable to retrieve page contents or page contents are empty.');
-            }
+      try {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId },
+          func: () => (document.body ? document.body.innerText : ''),
+        });
 
-            if (results[0].result === undefined || results[0].result == '') {
-              reject('Unable to retrieve page contents or page contents are empty.');
-            }
+        if (!results || results.length === 0 || !results[0] || results[0].result == null) {
+          throw new Error('Unable to retrieve page contents from this tab.');
+        }
 
-            resolve(results[0].result);
-          },
-        );
-      });
+        const text = String(results[0].result).trim();
+        if (text.length === 0) {
+          throw new Error('Unable to retrieve page contents or page contents are empty.');
+        }
+
+        return text;
+      } catch (error) {
+        const detail = error?.message || String(error);
+        throw new Error(`Unable to retrieve page contents (${detail}).`);
+      }
     }
   }
 
@@ -302,7 +303,13 @@ document.addEventListener('DOMContentLoaded', async function () {
   // the user has not yet created a profile. Select all text in the
   // instructions textarea when the user clicks on it.
   //----------------------------------------------------------------------------
-  const defaultInstruction = 'Please summarize this web page.';
+  const defaultInstruction = `Summarize this input text giving in this order:
+* Executive Summary paragraph stating title of content and primary tenants of content
+* Bullet list of key points for each major section in the content
+* References, tools, or people mentioned
+* Actions I might take immediately or in the future
+* Provide a link to the content.
+* Provide a "title string" in the form, title_source, composed of the article title and source using "-" characters instead of spaces and disallowed Windows filename characters. As one example, "Article-title-string_Source-of-article".`;
 
   instructions.value ||= defaultInstruction;
 
